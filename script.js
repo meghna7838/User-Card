@@ -1,48 +1,85 @@
 const divEle = document.querySelector('.card-container');
 
-
-function displayCard(id){
-const request1 = new XMLHttpRequest();
-//Open let us interact with server
-//What kind of request--first parameter
-//Second parameter is URL.
-request1.open('GET',`https://dummyjson.com/users/${id}`);
-//Sending it to server
-request1.send();
-//To display content when it is loaded
-request1.addEventListener('load',function(){
-    if(request1.status === 404) return;
-    console.log(typeof this.responseText);//String
-    //To convert to json
-    const data  = JSON.parse(this.responseText);
-    console.log(data);
-    cardDesign(data,'beforeend');
-
-    const req2 = new XMLHttpRequest();
-    req2.open('GET',`https://dummyjson.com/users/${id-1}`);
-    req2.send();
-    req2.addEventListener('load',function(){
-        if(req2.status ===404 )  return;
-        const data = JSON.parse(this.responseText);
-        cardDesign(data,'afterbegin','other');
-
-        const req3 = new XMLHttpRequest();
-        req3.open('GET',`https://dummyjson.com/users/${id+1}`);
-        req3.send();
-        req3.addEventListener('load',function(){
-            if(req3.status ===404 )  return;
-            const data = JSON.parse(this.responseText);
-            cardDesign(data,'beforeend','other')
-        })
-    });
-});
-
-
+function displayDetails(id){
+    fetch(`https://dummyjson.com/users/${id}`)
+    .then((response)=>{
+        if(!response.ok)
+        {
+            throw new Error("Id doesnt match any data");
+        }
+        return response.json();
+    })
+    .then((resp)=>{
+        cardDesign(resp,'beforeend');
+        return fetch(`https://dummyjson.com/users/${id-1}`);
+    })
+    .then((response)=>{
+        if(!response.ok)
+        {
+            throw new Error("No previous id exist");
+        }
+        return response.json();
+    })
+    .then((resp)=>{
+        cardDesign(resp,'afterbegin',"other");
+        return fetch(`https://dummyjson.com/users/${id+1}`);
+    })
+    .then((response)=>{
+        if(!response.ok)
+        {
+            throw new Error("No next id exist");
+        }
+        return response.json();
+    })
+    .then((resp)=>{
+        cardDesign(resp,'beforeend',"other");
+    })
+    .catch((err)=>{console.log(err);});
 }
 
-displayCard(2);
 
-function cardDesign(data,pos,classname)
+// function displayCard(id){
+// const request1 = new XMLHttpRequest();
+// //Open let us interact with server
+// //What kind of request--first parameter
+// //Second parameter is URL.
+// request1.open('GET',`https://dummyjson.com/users/${id}`);
+// //Sending it to server
+// request1.send();
+// //To display content when it is loaded
+// request1.addEventListener('load',function(){
+//     if(request1.status === 404) return;
+//     console.log(typeof this.responseText);//String
+//     //To convert to json
+//     const data  = JSON.parse(this.responseText);
+//     console.log(data);
+//     cardDesign(data,'beforeend');
+
+//     const req2 = new XMLHttpRequest();
+//     req2.open('GET',`https://dummyjson.com/users/${id-1}`);
+//     req2.send();
+//     req2.addEventListener('load',function(){
+//         if(req2.status ===404 )  return;
+//         const data = JSON.parse(this.responseText);
+//         cardDesign(data,'afterbegin','other');
+
+//         const req3 = new XMLHttpRequest();
+//         req3.open('GET',`https://dummyjson.com/users/${id+1}`);
+//         req3.send();
+//         req3.addEventListener('load',function(){
+//             if(req3.status ===404 )  return;
+//             const data = JSON.parse(this.responseText);
+//             cardDesign(data,'beforeend','other')
+//         })
+//     });
+// });
+
+
+// }
+
+// displayCard(2);
+
+function cardDesign(data,pos,classname='')
 {
     const card=`<div class= "user-card ${classname}">
     <img src=${data.image} alt="Profile Image">
@@ -50,7 +87,8 @@ function cardDesign(data,pos,classname)
     <h3>${data.lastName}</h3>
     <p class="email">${data.email}</p>
     <button class = "btn">View Profile</button>
-    </div>`
+    </div>`;
 
     divEle.insertAdjacentHTML(pos,card);
 }
+displayDetails(2);
