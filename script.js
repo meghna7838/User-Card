@@ -1,35 +1,26 @@
 const divEle = document.querySelector('.card-container');
 
-function displayDetails(id){
-    fetch(`https://dummyjson.com/users/${id}`)
+function getUser(url)
+{
+    return fetch(url)
     .then((response)=>{
         if(!response.ok)
         {
             throw new Error("Id doesnt match any data");
         }
         return response.json();
-    })
+});
+}
+
+function displayDetails(id){
+    getUser(`https://dummyjson.com/users/${id}`)
     .then((resp)=>{
         cardDesign(resp,'beforeend');
-        return fetch(`https://dummyjson.com/users/${id-1}`);
-    })
-    .then((response)=>{
-        if(!response.ok)
-        {
-            throw new Error("No previous id exist");
-        }
-        return response.json();
+        return getUser(`https://dummyjson.com/users/${id-1}`);
     })
     .then((resp)=>{
         cardDesign(resp,'afterbegin',"other");
-        return fetch(`https://dummyjson.com/users/${id+1}`);
-    })
-    .then((response)=>{
-        if(!response.ok)
-        {
-            throw new Error("No next id exist");
-        }
-        return response.json();
+        return getUser(`https://dummyjson.com/users/${id+1}`);
     })
     .then((resp)=>{
         cardDesign(resp,'beforeend',"other");
@@ -37,6 +28,20 @@ function displayDetails(id){
     .catch((err)=>{console.log(err);});
 }
 
+
+function cardDesign(data,pos,classname='')
+{
+    const card=`<div class= "user-card ${classname}">
+    <img src=${data.image} alt="Profile Image">
+    <h3>${data.firstName}</h3>
+    <h3>${data.lastName}</h3>
+    <p class="email">${data.email}</p>
+    <button class = "btn">View Profile</button>
+    </div>`;
+
+    divEle.insertAdjacentHTML(pos,card);
+}
+displayDetails(2);
 
 // function displayCard(id){
 // const request1 = new XMLHttpRequest();
@@ -78,17 +83,3 @@ function displayDetails(id){
 // }
 
 // displayCard(2);
-
-function cardDesign(data,pos,classname='')
-{
-    const card=`<div class= "user-card ${classname}">
-    <img src=${data.image} alt="Profile Image">
-    <h3>${data.firstName}</h3>
-    <h3>${data.lastName}</h3>
-    <p class="email">${data.email}</p>
-    <button class = "btn">View Profile</button>
-    </div>`;
-
-    divEle.insertAdjacentHTML(pos,card);
-}
-displayDetails(2);
